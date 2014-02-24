@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Emergency Services Directory</title>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>	
+	
+	<!-- Google Maps Plugin (http://www.pittss.lv/jquery/gomap/index.php) -->
+	<script type="text/javascript" src="js/jquery.gomap-1.3.2.min.js"></script>
+	
+	<!-- Bootstrap (http://twitter.github.com/bootstrap/index.html) -->
+	<!-- Used for modal dialogs and tabs -->
+	<script src="js/bootstrap.min.js" type="text/javascript"></script>
+	
+	<!-- DataTables Plugin (http://datatables.net/index) -->
+	<!-- Used for table sorting, filtering, and pagination -->
+	<script src="js/jquery.dataTables.min.js" type="text/javascript"></script>
+	
+	<!-- AutoComplete Plugin (http://www.devbridge.com/projects/autocomplete/jquery/) -->
+	<script src="js/jquery.autocomplete.js" type="text/javascript"></script>
+	
+	<!-- My Styles & Scripts -->
+	<link rel="stylesheet" type="text/css" href="css/styles.css"/>
+	<script src="js/script.js" type="text/javascript"></script>
+</head>
+<body>
+	<div id="header">
+		<h1><span class="fontawesome-medkit"></span> Emergency Services Directory</h1>
+	</div>
+	
+	<div id="content">
+		<!-- Search Form -->
+		<form id="sForm" class="searchForm">
+			
+			<!-- Basic Search Options -->	
+			<p class="basic">			
+				<label for="orgType">Organization Type</label>
+				<span class='selectWrapper' id="orgTypeMsg"><select id="orgType" name="type"></select></span>
+			</p>
+			<p class="basic">
+				<label for="orgName">Organization Name</label>
+				<input id="orgName" onfocus="suggestValues('Name')" onkeypress="enterSubmit(event)" type="text" name="name">
+			</p>
+			<p class="basic button">
+				<input type="button" value="Show Results" onclick="getResults()">
+			</p>
+			
+			<br style="clear: both;"/>
+			
+			<!-- Advanced Search Options -->
+			<p id="showAdvanced" onclick="toggleOptions()">Show Advanced Options</p>
+			<div id="advancedOptions">
+				<p class="advanced">
+					<label for="state">State</label>
+					<span class='selectWrapper'>
+						<select id="state" onchange="getCities(this.value)" name="state">
+							<option value="">--Search All States--</option>
+							<option value="AK">AK</option>
+							<option value="AL">AL</option>
+							<option value="AR">AR</option>
+							<option value="AZ">AZ</option>
+							<option value="CA">CA</option>
+							<option value="CO">CO</option>
+							<option value="CT">CT</option>
+							<option value="DC">DC</option>
+							<option value="DE">DE</option>
+							<option value="FL">FL</option>
+							<option value="GA">GA</option>
+							<option value="HI">HI</option>
+							<option value="IA">IA</option>
+							<option value="ID">ID</option>
+							<option value="IL">IL</option>
+							<option value="IN">IN</option>
+							<option value="KS">KS</option>
+							<option value="KY">KY</option>
+							<option value="LA">LA</option>
+							<option value="MA">MA</option>
+							<option value="MD">MD</option>
+							<option value="ME">ME</option>
+							<option value="MI">MI</option>
+							<option value="MN">MN</option>
+							<option value="MO">MO</option>
+							<option value="MS">MS</option>
+							<option value="MT">MT</option>
+							<option value="NC">NC</option>
+							<option value="ND">ND</option>
+							<option value="NE">NE</option>
+							<option value="NH">NH</option>
+							<option value="NJ">NJ</option>
+							<option value="NM">NM</option>
+							<option value="NV">NV</option>
+							<option value="NY" selected="selected">NY</option>
+							<option value="OH">OH</option>
+							<option value="OK">OK</option>
+							<option value="OR">OR</option>
+							<option value="PA">PA</option>
+							<option value="RI">RI</option>
+							<option value="SC">SC</option>
+							<option value="SD">SD</option>
+							<option value="TN">TN</option>
+							<option value="TX">TX</option>
+							<option value="UT">UT</option>
+							<option value="VA">VA</option>
+							<option value="VT">VT</option>
+							<option value="WA">WA</option>
+							<option value="WI">WI</option>
+							<option value="WV">WV</option>
+							<option value="WY">WY</option>
+						  </select>
+					</span>
+				</p>
+				<p class="advanced">
+					<label for="city">City</label>
+					<span class='selectWrapper' id="orgCitySearch"></span>
+				</p>
+				<p class="advanced">
+					<label for="county">County</label>
+					<input id="county" onfocus="suggestValues('CountyName')" type="text" name="county">
+				</p>
+				<p class="advanced last">
+					<label for="zip">Zip Code</label>
+					<input id="zip" onfocus="suggestValues('zip')" type="text" name="zip">
+				</p>
+			</div>
+			
+			<br style="clear: both;"/>
+			
+		</form>
+		<!-- End Search Form -->
+	</div>
+
+	<!-- Search Results -->
+		<div id="tableOutput">
+			<h2 id="resultsTitle">Results: <small id="numResults"></small></h2>
+			<table id="searchResults" width="100%"></table>
+			<br style="clear: both;"/>
+		</div>
+
+	<!-- Modal Window -->
+	<div id="modal" class="modal fade" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 id="modalTitle"></h3>
+				</div>
+				<div class="modal-body">
+					<ul id="tabs" class="nav nav-tabs" data-tabs="tabs"></ul>
+					<div class="tab-content"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="footer">Copyright &copy; 2014 <a href="http://www.carlacrandall.com">Carla Crandall</a></div>
+	
+</body>
+</html>
+
+
+
+
